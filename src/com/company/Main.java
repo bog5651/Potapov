@@ -11,7 +11,6 @@ public class Main {
     public static double[] t;
 
     public static Double[][] pSystem;
-    //public static HashMap<Integer, HashMap<Integer, Double>> pSystem = new HashMap<>();
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
@@ -89,20 +88,12 @@ public class Main {
             }
 
             for (int v = 1; v <= r; v++) {
-                System.out.printf("v = %d\n", v);
-                System.out.printf("|%2s|%12s|%12s|%12s|\n", "k", "RBase", "comb", "R *");
+                System.out.printf("\n|%2s|%2s|%12s|\n", "v", "k", "p");
                 for (int k = 0; k <= mCount; k++) {
-                    ArrayList<ArrayList<Integer>> v_list = getVariations(s_list, k, q);
-
-                    double R = R(nList, s_list, v_list);
-                    double comb = variatic(nCount + mCount, k);
-                    double R_star = R / comb;
-                    System.out.printf("|%2d|%12.5f|%12.5f|%12.5f|\n", k, R, comb, R_star);
-
                     double pResult = 0;
                     for (int j = 0; j <= k; j++) {
                         if (k == 0) {
-                            pResult = pSystem[0][v - 1] * Math.exp(-getD(1, v, R_star) * t[v]);
+                            pResult = pSystem[0][v - 1] * Math.exp(-getD(1, v) * t[v]);
                             break;
                         }
 
@@ -110,19 +101,19 @@ public class Main {
 
                         double multResult = 1;
                         for (int i = j + 1; i <= k; i++) {
-                            double A = getA(i, v, R_star);
+                            double A = getA(i, v);
 
                             double sumResult = 0;
                             for (int l = j + 1; l <= k + 1; l++) {
-                                double exponent = Math.exp(-getD(l, v, R_star) * t[v]);
+                                double exponent = Math.exp(-getD(l, v) * t[v]);
 
                                 double multBResult = 1;
                                 for (int o = j + 1; o <= k + 1; o++) {
                                     if (l == o) {
                                         continue;
                                     }
-                                    double firstD = getD(o, v, R_star);
-                                    double secondD = getD(l, v, R_star);
+                                    double firstD = getD(o, v);
+                                    double secondD = getD(l, v);
 
                                     multBResult *= (firstD - secondD);
                                 }
@@ -138,7 +129,7 @@ public class Main {
 
                     pSystem[k][v] = pResult;
 
-                    System.out.printf("p = %.20f\n", pResult);
+                    System.out.printf("|%2d|%2d|%12.5f|\n", v, k, pResult);
                 }
             }
 
@@ -146,6 +137,8 @@ public class Main {
             for (int i = 0; i < pSystem.length; i++) {
                 sumP += pSystem[i][r];
             }
+
+//            System.out.printf("sumP = %f\n", sumP);
             pList.add(sumP);
         }
 
@@ -165,7 +158,8 @@ public class Main {
     }
 
     public static double lambda(double i, double t) {
-        return i + t / 3;
+//        return i + t / 3;
+        return t / 3;
     }
 
     private static ArrayList<ArrayList<Integer>> getVariations(ArrayList<Integer> s_List, int k, int groups) {
@@ -228,7 +222,7 @@ public class Main {
                 int a = n.get(i) + s.get(i);
                 result *= variatic(a, vList.get(i));
             }
-            sum +=result;
+            sum += result;
         }
         return sum;
     }
@@ -255,37 +249,44 @@ public class Main {
         return k <= si ? 0 : 1;
     }
 
-    public static double getBetta(int i, int k, double r_star) {
+    public static double getBetta(int i, int k) {
         if (i == 0) {
-            return (mCount - k + 1) * r_star;
+            return (mCount - k + 1) * getR(k);
         } else {
-            return getSigma(s_line.get(i)) * nList.get(i) * r_star + nList.get(i) + getOmega(k, s_line.get(i));
+            return getSigma(s_line.get(i)) * nList.get(i) * getR(k) + nList.get(i) * getOmega(k, s_line.get(i));
         }
     }
 
-    public static double getAlpha(int i, int k, double r_star) {
+    public static double getAlpha(int i, int k) {
         if (i == 0) {
-            return (mCount - k + 1) * r_star;
+            return (mCount - k + 1) * getR(k);
         } else {
-            return getSigma(s_line.get(i)) * nList.get(i) * r_star;
+            return getSigma(s_line.get(i)) * nList.get(i) * getR(k);
         }
     }
 
-    public static double getA(int k, int v, double r_star) {
+    public static double getA(int k, int v) {
         double result = 0;
         for (int i = 0; i < q; i++) {
             double liv = 0.5 * (lambda(i, t[v - 1]) + lambda(i, t[v])); //6
-            result += getAlpha(i, k, r_star) * liv;
+            result += getAlpha(i, k) * liv;
         }
         return result;
     }
 
-    public static double getD(int k, int v, double r_star) {
+    public static double getD(int k, int v) {
         double result = 0;
         for (int i = 0; i < q; i++) {
             double liv = 0.5 * (lambda(i, t[v - 1]) + lambda(i, t[v])); //6
-            result += getBetta(i, k, r_star) * liv;
+            result += getBetta(i, k) * liv;
         }
         return result;
+    }
+
+    public static double getR(int k) {
+        ArrayList<ArrayList<Integer>> v_list = getVariations(s_line, k, q);
+        double R = R(nList, s_line, v_list);
+        double comb = variatic(nCount + mCount, k);
+        return R / comb;
     }
 }
