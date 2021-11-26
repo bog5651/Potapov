@@ -133,8 +133,8 @@ public class Main {
             }
 
             double sumP = 0;
-            for (int i = 0; i < pSystem.length; i++) {
-                sumP += pSystem[i][r];
+            for (Double[] doubles : pSystem) {
+                sumP += doubles[r];
             }
 
 //            System.out.printf("sumP = %f\n", sumP);
