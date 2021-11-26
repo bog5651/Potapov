@@ -10,7 +10,8 @@ public class Main {
     public static ArrayList<Integer> nList;
     public static double[] t;
 
-    public static HashMap<Integer, HashMap<Integer, Double>> pSystem = new HashMap<>();
+    public static Double[][] pSystem;
+    //public static HashMap<Integer, HashMap<Integer, Double>> pSystem = new HashMap<>();
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
@@ -68,7 +69,7 @@ public class Main {
             if (maxfri <= e) { //14
                 System.out.println("OUT 14");
                 System.out.printf("r = %d \n", r);
-                System.out.printf("max FRI = %f\n", maxfri);
+                System.out.printf("max FRI = %.8f\n", maxfri);
                 t = ts;
                 break;
             }
@@ -76,39 +77,36 @@ public class Main {
 
         //17
         ArrayList<ArrayList<Integer>> s_list_list = getVariations(null, mCount, q);
+        ArrayList<Double> pList = new ArrayList<>();
         for (ArrayList<Integer> s_list : s_list_list) {
             s_line = s_list;
             printArray("s = ", s_list);
 
-            pSystem = new HashMap<>();
-            HashMap<Integer, Double> pSystemRaw = new HashMap<>();
-            pSystemRaw.put(0, 1.0);
-            pSystem.put(0, pSystemRaw);
-            for (int i = 1; i < mCount; i++) {
-                pSystemRaw = new HashMap<>();
-                pSystemRaw.put(0, 0.0);
-                pSystem.put(i, pSystemRaw);
+            pSystem = new Double[mCount + 1][r + 1];
+            pSystem[0][0] = 1.0;
+            for (int i = 1; i <= mCount; i++) {
+                pSystem[i][0] = 0.0;
             }
 
             for (int v = 1; v <= r; v++) {
                 System.out.printf("v = %d\n", v);
                 System.out.printf("|%2s|%12s|%12s|%12s|\n", "k", "RBase", "comb", "R *");
-                for (int k = 0; k < mCount; k++) {
+                for (int k = 0; k <= mCount; k++) {
                     ArrayList<ArrayList<Integer>> v_list = getVariations(s_list, k, q);
 
-                    double comb = variatic(nCount + mCount, k);
                     double R = R(nList, s_list, v_list);
+                    double comb = variatic(nCount + mCount, k);
                     double R_star = R / comb;
                     System.out.printf("|%2d|%12.5f|%12.5f|%12.5f|\n", k, R, comb, R_star);
 
                     double pResult = 0;
                     for (int j = 0; j <= k; j++) {
-                        if(k == 0) {
-                            pResult = pSystem.get(0).get(v - 1) * Math.exp(-getD(1, v, R_star) * t[v]);
+                        if (k == 0) {
+                            pResult = pSystem[0][v - 1] * Math.exp(-getD(1, v, R_star) * t[v]);
                             break;
                         }
 
-                        double pPrev = pSystem.get(j).get(v - 1);
+                        double pPrev = pSystem[j][v - 1];
 
                         double multResult = 1;
                         for (int i = j + 1; i <= k; i++) {
@@ -120,7 +118,7 @@ public class Main {
 
                                 double multBResult = 1;
                                 for (int o = j + 1; o <= k + 1; o++) {
-                                    if(l == o) {
+                                    if (l == o) {
                                         continue;
                                     }
                                     double firstD = getD(o, v, R_star);
@@ -138,19 +136,23 @@ public class Main {
                         pResult += pPrev * multResult;
                     }
 
-                    pSystemRaw = pSystem.get(k);
-                    pSystemRaw.put(v, pResult);
-                    pSystem.put(k, pSystemRaw);
+                    pSystem[k][v] = pResult;
 
-                    System.out.println(pResult);
-
-//                    for (ArrayList<Integer> list : v_list) {
-//                        printArray("v = ", list);
-//                    }
+                    System.out.printf("p = %.20f\n", pResult);
                 }
             }
+
+            double sumP = 0;
+            for (int i = 0; i < pSystem.length; i++) {
+                sumP += pSystem[i][r];
+            }
+            pList.add(sumP);
         }
 
+        double pMax = pList.stream().max(Double::compareTo).get();
+        int pMaxIndex = pList.indexOf(pMax);
+        System.out.printf("pMax = %f\n", pMax);
+        printArray("final s\n s =", s_list_list.get(pMaxIndex));
         //the end
     }
 
@@ -219,16 +221,16 @@ public class Main {
     }
 
     public static double R(ArrayList<Integer> n, ArrayList<Integer> s, ArrayList<ArrayList<Integer>> v) {
-        ArrayList<Long> mult = new ArrayList<>();
+        double sum = 0;
         for (ArrayList<Integer> vList : v) {
             long result = 1;
             for (int i = 0; i < n.size(); i++) {
                 int a = n.get(i) + s.get(i);
                 result *= variatic(a, vList.get(i));
             }
-            mult.add(result);
+            sum +=result;
         }
-        return mult.stream().mapToLong(item -> item).sum();
+        return sum;
     }
 
     public static long variatic(int a, int b) {
