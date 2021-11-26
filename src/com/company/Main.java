@@ -3,7 +3,6 @@ package com.company;
 import java.util.*;
 
 public class Main {
-
     public static int mCount, nCount, q, tf;
     public static double e;
     public static ArrayList<Integer> s_line;
@@ -66,7 +65,7 @@ public class Main {
             double maxfri = Collections.max(fri); //13
             //System.out.printf("max FRI = %f\n", maxfri);
             if (maxfri <= e) { //14
-                System.out.println("OUT 14");
+                System.out.println("finish 14 algorithm's step");
                 System.out.printf("r = %d \n", r);
                 System.out.printf("max FRI = %.8f\n", maxfri);
                 t = ts;
