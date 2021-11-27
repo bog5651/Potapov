@@ -1,5 +1,7 @@
 package com.company;
 
+import javax.swing.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main {
@@ -8,10 +10,11 @@ public class Main {
     public static ArrayList<Integer> s_line;
     public static ArrayList<Integer> nList;
     public static double[] t;
+    public static String lambdaFunction = "";
 
-    public static Double[][] pSystem;
+    public static HashMap<Integer, Long> factorialHash = new HashMap<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalStateException {
         Scanner in = new Scanner(System.in);
 
         while (true) {
@@ -24,8 +27,12 @@ public class Main {
                 tf = in.nextInt();
                 System.out.print("e = ");
                 e = in.nextDouble();
+                System.out.print("func(i, t) = ");
+                lambdaFunction = in.next();
                 break;
             } catch (InputMismatchException ex) {
+                in.reset();
+                in.next();
                 System.out.println("Не число");
             }
         }
@@ -75,12 +82,16 @@ public class Main {
 
         //17
         ArrayList<ArrayList<Integer>> s_list_list = getVariations(null, mCount, q);
-        ArrayList<Double> pList = new ArrayList<>();
+//        ArrayList<Double> pList = new ArrayList<>();
+        double pMax = Double.MIN_VALUE;
+        ArrayList<Integer> sListMax = null;
+        Double[][] pSystemMax = null;
         for (ArrayList<Integer> s_list : s_list_list) {
             s_line = s_list;
-            printArray("s = ", s_list);
+            System.out.println(printArray("s = ", s_list));
 
-            pSystem = new Double[mCount + 1][r + 1];
+
+            Double[][] pSystem = new Double[mCount + 1][r + 1];
             pSystem[0][0] = 1.0;
             for (int i = 1; i <= mCount; i++) {
                 pSystem[i][0] = 0.0;
@@ -137,28 +148,83 @@ public class Main {
                 sumP += doubles[r];
             }
 
-//            System.out.printf("sumP = %f\n", sumP);
-            pList.add(sumP);
+            if(sumP >= pMax) {
+                pMax = sumP;
+                sListMax = s_list;
+                pSystemMax = pSystem;
+            }
+        }
+        if(pSystemMax == null || sListMax == null) {
+            throw new IllegalStateException("Error");
         }
 
-        double pMax = pList.stream().max(Double::compareTo).get();
-        int pMaxIndex = pList.indexOf(pMax);
+        ArrayList<ArrayList<DoublePoint>> set = new ArrayList<>();
+        for (Double[] pSystemMaxRow : pSystemMax) {
+            //get all <p> for <k> errors
+            ArrayList<DoublePoint> row = new ArrayList<>();
+            for (int v = 0; v < pSystemMaxRow.length; v++) {
+                Double val = pSystemMaxRow[v];
+                row.add(new DoublePoint(v, val));
+            }
+            set.add(row);
+        }
+
+
+        String finalSLine = printArray("s =", sListMax);
+
         System.out.printf("pMax = %f\n", pMax);
-        printArray("final s\n s =", s_list_list.get(pMaxIndex));
+        System.out.printf("final s\n%s\n", finalSLine);
+
+        System.out.printf("|%3s|%3s|%3s|%5s|\n", "m", "q", "tf", "e");
+        System.out.printf("|%3d|%3d|%3d|%5.3f|\n", mCount, q, tf, e);
+
+        System.out.println(printArray("stock n =", nList));
+        System.out.printf("lambda func(i, t) = %s\n", lambdaFunction);
+
+        ScatterChart pChart = new ScatterChart(finalSLine, set);
+        pChart.setLabels("Время", "Вероятность");
+        pChart.setLinePostfix("k");
+        pChart.setVisible(true);
+        pChart.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        set = new ArrayList<>();
+        for (int i = 0; i < q; i++) {
+            ArrayList<DoublePoint> row = new ArrayList<>();
+            for (int v = 0; v <= r; v++) {
+                row.add(new DoublePoint(v, lambda(i, t[v])));
+            }
+            set.add(row);
+        }
+
+        ScatterChart lambdaChart = new ScatterChart(finalSLine, set);
+        lambdaChart.setLabels("Время", "lambda");
+        lambdaChart.setVisible(true);
+        lambdaChart.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         //the end
     }
 
-    public static void printArray(String prefix, ArrayList<Integer> list) {
-        System.out.print(prefix + " { ");
+    public static String printArray(String prefix, ArrayList<Integer> list) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(prefix).append(" { ");
         for (Integer o : list) {
-            System.out.print(o + " ");
+            builder.append(o).append(" ");
         }
-        System.out.println("}");
+        builder.append("}");
+        return builder.toString();
     }
 
     public static double lambda(double i, double t) {
-//        return i + t / 3;
-        return t / 3;
+        MathParser parser = new MathParser();
+        try {
+            MathParser.setVariable("i", i);
+            MathParser.setVariable("t", t);
+            return parser.Parse(lambdaFunction);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(123);
+        }
+
+        return Double.MIN_VALUE;
     }
 
     private static ArrayList<ArrayList<Integer>> getVariations(ArrayList<Integer> s_List, int k, int groups) {
@@ -231,11 +297,18 @@ public class Main {
     }
 
     public static long factorial(int number) {
+        Long cacheVal = factorialHash.get(number);
+        if(cacheVal != null) {
+            return cacheVal;
+        }
+
         long result = 1;
 
         for (int factor = 2; factor <= number; factor++) {
             result *= factor;
         }
+
+        factorialHash.put(number, result);
 
         return result;
     }
