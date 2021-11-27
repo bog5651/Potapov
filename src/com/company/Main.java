@@ -87,7 +87,7 @@ public class Main {
             }
 
             for (int v = 1; v <= r; v++) {
-                System.out.printf("\n|%2s|%2s|%12s|\n", "v", "k", "p");
+                System.out.printf("\n|%3s|%2s|%12s|\n", "v", "k", "p");
                 for (int k = 0; k <= mCount; k++) {
                     double pResult = 0;
                     for (int j = 0; j <= k; j++) {
@@ -128,7 +128,7 @@ public class Main {
 
                     pSystem[k][v] = pResult;
 
-                    System.out.printf("|%2d|%2d|%12.5f|\n", v, k, pResult);
+                    System.out.printf("|%3d|%2d|%12.5f|\n", v, k, pResult);
                 }
             }
 
@@ -249,11 +249,13 @@ public class Main {
     }
 
     public static double getBetta(int i, int k) {
+        if(k == mCount + 1) {
+            return getSigma(s_line.get(i)) * nList.get(i);
+        }
         if (i == 0) {
             return (mCount - k + 1) * getR(k);
-        } else {
-            return getSigma(s_line.get(i)) * nList.get(i) * getR(k) + nList.get(i) * getOmega(k, s_line.get(i));
         }
+        return getSigma(s_line.get(i)) * nList.get(i) * getR(k) + nList.get(i) * getOmega(k, s_line.get(i));
     }
 
     public static double getAlpha(int i, int k) {
