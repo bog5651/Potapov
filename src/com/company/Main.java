@@ -11,6 +11,7 @@ public class Main {
     public static ArrayList<Integer> nList;
     public static double[] t;
     public static String lambdaFunction = "";
+    public static MathParser parser = new MathParser();;
 
     public static HashMap<Integer, Long> factorialHash = new HashMap<>();
 
@@ -214,7 +215,6 @@ public class Main {
     }
 
     public static double lambda(double i, double t) {
-        MathParser parser = new MathParser();
         try {
             MathParser.setVariable("i", i);
             MathParser.setVariable("t", t);
