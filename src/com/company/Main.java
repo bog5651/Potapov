@@ -84,7 +84,7 @@ public class Main {
         //17
         ArrayList<ArrayList<Integer>> s_list_list = getVariations(null, mCount, q);
 //        ArrayList<Double> pList = new ArrayList<>();
-        double pMax = Double.MIN_VALUE;
+        double pMax = -1;
         ArrayList<Integer> sListMax = null;
         Double[][] pSystemMax = null;
         for (ArrayList<Integer> s_list : s_list_list) {
@@ -148,6 +148,8 @@ public class Main {
             for (Double[] doubles : pSystem) {
                 sumP += doubles[r];
             }
+
+            System.out.println(sumP);
 
             if(sumP >= pMax) {
                 pMax = sumP;
