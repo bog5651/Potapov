@@ -138,29 +138,28 @@ public class Core {
                         double multResult = 1;
                         for (int i = j + 1; i <= k; i++) {
                             double A = getA(i, v);
-
-                            double sumResult = 0;
-                            for (int l = j + 1; l <= k + 1; l++) {
-                                double exponent = Math.exp(-getD(l, v) * t[v]);
-
-                                double multBResult = 1;
-                                for (int o = j + 1; o <= k + 1; o++) {
-                                    if (l == o) {
-                                        continue;
-                                    }
-                                    double firstD = getD(o, v);
-                                    double secondD = getD(l, v);
-
-                                    multBResult *= (firstD - secondD);
-                                }
-
-                                sumResult += exponent / multBResult;
-                            }
-
-                            multResult *= A * sumResult;
+                            multResult *= A;
                         }
 
-                        pResult += pPrev * multResult;
+                        double sumResult = 0;
+                        for (int l = j + 1; l <= k + 1; l++) {
+                            double exponent = Math.exp(-getD(l, v) * t[v]);
+
+                            double multBResult = 1;
+                            for (int o = j + 1; o <= k + 1; o++) {
+                                if (l == o) {
+                                    continue;
+                                }
+                                double firstD = getD(o, v);
+                                double secondD = getD(l, v);
+
+                                multBResult *= (firstD - secondD);
+                            }
+
+                            sumResult += exponent / multBResult;
+                        }
+
+                        pResult += pPrev * multResult * sumResult;
                     }
 
                     pSystem[k][v] = pResult;
@@ -186,7 +185,7 @@ public class Core {
 
         String finalSLine = printArray("s =", result.sLine);
 
-        log(String.format("pMax = %f", result.pMax), DebugLevel.LOW);
+        log(String.format("pMax = %g", result.pMax), DebugLevel.LOW);
         log(String.format("final s\n%s", finalSLine), DebugLevel.LOW);
 
         log(String.format("|%3s|%3s|%3s|%5s|", "m", "q", "tf", "e"), DebugLevel.MEDIUM);

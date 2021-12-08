@@ -16,7 +16,7 @@ import java.util.Scanner;
 import static com.company.Utils.printArray;
 
 public class Main {
-    public static final boolean useDefault = false;
+    public static final boolean useDefault = true;
     public static final boolean useConsoleInput = false;
 
     public static void main(String[] args) {
@@ -27,7 +27,7 @@ public class Main {
         if (useDefault) {
             core.withMCount(4)
                     .withQ(4)
-                    .withTF(2)
+                    .withTF(1)
                     .withE(0.01)
                     .withLambdaFunction("i+t/3");
             nList.add(1);
